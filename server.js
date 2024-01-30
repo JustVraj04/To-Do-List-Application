@@ -3,6 +3,7 @@ import http from "http";
 import mongoose from "mongoose";
 import bodyParser from "body-parser";
 import dotenv from "dotenv";
+import taskRoutes from "./routes/task.js";
 
 dotenv.config();
 const bootstrap = async () => {
@@ -23,6 +24,7 @@ const bootstrap = async () => {
 
   app.use(bodyParser.json());
 
+  app.use("/tasks", taskRoutes);
   return { app, server };
 };
 
