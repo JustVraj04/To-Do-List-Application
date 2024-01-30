@@ -39,4 +39,19 @@ const loginUser = async (req, res) => {
   }
 };
 
-export { registerUser, loginUser };
+const logout = async (req, res) => {
+  try {
+    const token = req.cookies.token;
+
+    if (!token) {
+      return res.status(401).json({ error: "You are not logged in." });
+    }
+
+    // delete token cookie
+    res.clearCookie("token").send();
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export { registerUser, loginUser, logout };

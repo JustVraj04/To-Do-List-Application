@@ -8,4 +8,7 @@ router.post("/register", userController.registerUser);
 // Login user
 router.post("/login", userController.loginUser);
 
+// Logout user
+router.post("/logout", userController.logout);
+
 export default router;
