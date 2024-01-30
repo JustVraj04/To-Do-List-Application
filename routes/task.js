@@ -1,28 +1,21 @@
 import express from "express";
 const router = express.Router();
-import {
-  createTask,
-  getAllTasks,
-  markTaskAsCompleted,
-  editTask,
-  deleteTask,
-} from "../controllers/task.js";
-
+import * as taskController from "../controllers/task.js";
 // Routes
 
 // Create a new task
-router.post("/", createTask);
+router.post("/", taskController.createTask);
 
 // Get a list of all tasks
-router.get("/", getAllTasks);
+router.get("/", taskController.getAllTasks);
 
 // Mark a task as completed
-router.patch("/:id/complete", markTaskAsCompleted);
+router.patch("/:id/complete", taskController.markTaskAsCompleted);
 
 // Edit task details
-router.put("/:id", editTask);
+router.put("/:id", taskController.editTask);
 
 // Delete a task
-router.delete("/:id", deleteTask);
+router.delete("/:id", taskController.deleteTask);
 
 export default router;

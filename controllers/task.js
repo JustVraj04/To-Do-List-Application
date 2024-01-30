@@ -1,7 +1,13 @@
 import Task from "../models/taskModel.js";
-
+import jwt from "jsonwebtoken";
 export const createTask = async (req, res) => {
   try {
+    // get token from cookie
+    const token = req.cookies.token;
+    const decode = jwt.verify(token, process.env.JWT_SECRET);
+
+    // get user id from decoded token
+    const userId = decode.userId;
     const { title, description } = req.body;
 
     const foundTask = await Task.findOne({ title });
@@ -10,13 +16,16 @@ export const createTask = async (req, res) => {
     if (!title) {
       return res.status(400).json({ error: "Task title cannot be empty." });
     }
+    if (!userId) {
+      return res.status(400).json({ error: "User not found." });
+    }
     if (foundTask) {
       return res
         .status(400)
         .json({ error: "Task with same title already exists." });
     }
 
-    const task = new Task({ title, description });
+    const task = new Task({ title, description, userId });
     await task.save();
 
     res.status(201).json(task);
@@ -27,7 +36,14 @@ export const createTask = async (req, res) => {
 
 export const getAllTasks = async (req, res) => {
   try {
-    const tasks = await Task.find();
+    // get token from cookie
+    const token = req.cookies.token;
+    const decode = jwt.verify(token, process.env.JWT_SECRET);
+
+    // get user id from decoded token
+    const userId = decode.userId;
+
+    const tasks = await Task.find({ userId });
     res.json(tasks);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -36,6 +52,12 @@ export const getAllTasks = async (req, res) => {
 
 export const markTaskAsCompleted = async (req, res) => {
   try {
+    // get token from cookie
+    const token = req.cookies.token;
+    const decode = jwt.verify(token, process.env.JWT_SECRET);
+
+    // get user id from decoded token
+    const userId = decode.userId;
     const taskId = req.params.id;
 
     const task = await Task.findById(taskId);
@@ -47,6 +69,11 @@ export const markTaskAsCompleted = async (req, res) => {
         .json({ error: "Task not found or already completed." });
     }
 
+    if (userId !== task.userId) {
+      return res
+        .status(400)
+        .json({ error: "You are not authorized to complete this task." });
+    }
     task.completed = true;
     await task.save();
 
@@ -58,7 +85,19 @@ export const markTaskAsCompleted = async (req, res) => {
 
 export const editTask = async (req, res) => {
   try {
+    // get token from cookie
+    const token = req.cookies.token;
+    const decode = jwt.verify(token, process.env.JWT_SECRET);
+
+    // get user id from decoded token
+    const userId = decode.userId;
     const taskId = req.params.id;
+    const foundTask = await Task.findById(taskId);
+    if (userId !== foundTask.userId) {
+      return res
+        .status(400)
+        .json({ error: "You are not authorized to edit this task." });
+    }
     const { title, description } = req.body;
 
     // Validation: Ensure that task titles are not empty
@@ -85,7 +124,19 @@ export const editTask = async (req, res) => {
 
 export const deleteTask = async (req, res, next) => {
   try {
+    // get token from cookie
+    const token = req.cookies.token;
+    const decode = jwt.verify(token, process.env.JWT_SECRET);
+
+    // get user id from decoded token
+    const userId = decode.userId;
     const taskId = req.params.id;
+    const foundTask = await Task.findById(taskId);
+    if (userId !== foundTask.userId) {
+      return res
+        .status(400)
+        .json({ error: "You are not authorized to delete this task." });
+    }
     const task = await Task.findByIdAndDelete(taskId);
 
     // Handle task not found

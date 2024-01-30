@@ -2,8 +2,10 @@ import express from "express";
 import http from "http";
 import mongoose from "mongoose";
 import bodyParser from "body-parser";
+import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import taskRoutes from "./routes/task.js";
+import userRoutes from "./routes/user.js";
 
 dotenv.config();
 const bootstrap = async () => {
@@ -11,6 +13,7 @@ const bootstrap = async () => {
   const server = http.createServer(app);
 
   app.use(bodyParser.json());
+  app.use(cookieParser());
   app.use(express.urlencoded({ extended: false }));
 
   await mongoose
@@ -25,6 +28,7 @@ const bootstrap = async () => {
   app.use(bodyParser.json());
 
   app.use("/tasks", taskRoutes);
+  app.use("/users", userRoutes);
   return { app, server };
 };
 
